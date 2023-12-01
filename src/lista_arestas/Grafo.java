@@ -1,6 +1,7 @@
 package lista_arestas;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Grafo<T> {
@@ -12,11 +13,11 @@ public class Grafo<T> {
     }
 
     public List<Vertice<T>> getVertices() {
-        return vertices;
+        return this.vertices;
     }
 
     public List<Aresta<T>> getArestas() {
-        return arestas;
+        return this.arestas;
     }
 
     public Vertice<T> adicionaVertice(T valor) {
@@ -54,85 +55,81 @@ public class Grafo<T> {
 
     public void buscaProfundidade() {
         boolean[] visitados = new boolean[vertices.size()];
-        for (Vertice<T> vertice : vertices) {
-            int index = vertices.indexOf(vertice);
-            if (!visitados[index]) {
-                buscaProfundidadeRecursiva(vertice, visitados);
-            }
+        int index;
+        for (Vertice<T> vertice : this.vertices) {
+            index = this.vertices.indexOf(vertice);
+            buscaProfundidadeRecursiva(vertice, visitados, index);
         }
     }
 
-    private void buscaProfundidadeRecursiva(Vertice<T> vertice, boolean[] visitados) {
-        visitados[vertices.indexOf(vertice)] = true;
-        System.out.println(vertice.getValor());
-        for (Aresta<T> aresta : arestas) {
-            if (aresta.getOrigem().equals(vertice) && !visitados[vertices.indexOf(aresta.getDestino())]) {
-                buscaProfundidadeRecursiva(aresta.getDestino(), visitados);
+    private void buscaProfundidadeRecursiva(Vertice<T> vertice, boolean[] visitados, int index) {
+        if (!visitados[index]) {
+            visitados[index] = true;
+            int indexDestino;
+            System.out.println(vertice.getValor());
+            for (Vertice<T> verticeDestino : this.verticesDestino(vertice)) {
+                indexDestino = this.vertices.indexOf(verticeDestino);
+                buscaProfundidadeRecursiva(verticeDestino, visitados, indexDestino);
             }
         }
     }
-
-    /*--- Função para descobrir se tem ciclo ---*/
 
     public boolean temCiclo() {
-        boolean[] visitados = new boolean[vertices.size()];
-        boolean[] noCaminho = new boolean[vertices.size()];
-        for (Vertice<T> vertice : vertices) {
-            int index = vertices.indexOf(vertice);
-            if (!visitados[index]) {
-                if (temCicloRecursivo(vertice, visitados, noCaminho))
-                    return true;
-            }
+        boolean[] visitados = new boolean[this.vertices.size()];
+        boolean[] noCaminho = new boolean[this.vertices.size()];
+        int index;
+        for (Vertice<T> vertice : this.vertices) {
+            index = this.vertices.indexOf(vertice);
+            return !visitados[index] && temCicloRecursivo(vertice, visitados, noCaminho, index);
         }
         return false;
     }
 
-    private boolean temCicloRecursivo(Vertice<T> vertice, boolean[] visitados, boolean[] noCaminho) {
-        int index = vertices.indexOf(vertice);
+    private boolean temCicloRecursivo(Vertice<T> vertice, boolean[] visitados, boolean[] noCaminho, int index) {
         visitados[index] = true;
         noCaminho[index] = true;
-        for (Aresta<T> aresta : arestas) {
-            if (aresta.getOrigem().equals(vertice)) {
-                Vertice<T> vizinho = aresta.getDestino();
-                int vizinhoIndex = vertices.indexOf(vizinho);
-                if (!visitados[vizinhoIndex]) {
-                    if (temCicloRecursivo(vizinho, visitados, noCaminho)) {
-                        return true;
-                    }
-                } else if (noCaminho[vizinhoIndex]) {
+        for (Vertice<T> verticeDestino : this.verticesDestino(vertice)) {
+            int vizinhoIndex = this.vertices.indexOf(verticeDestino);
+            if (!visitados[vizinhoIndex]) {
+                if (temCicloRecursivo(verticeDestino, visitados, noCaminho, vizinhoIndex)) {
                     return true;
                 }
+            } else if (noCaminho[vizinhoIndex]) {
+                return true;
             }
         }
         noCaminho[index] = false;
         return false;
     }
 
-    /*--- Função para fazer a ordenação topológica ---*/
-
-    public List<Vertice<T>> ordenacaoTopologica(){
-        if (temCiclo()) {
+    public List<Vertice<T>> ordenacaoTopologica() {
+        if (this.temCiclo()) {
             return null;
         }
         List<Vertice<T>> resultado = new ArrayList<>();
-        boolean[] visitados = new boolean[vertices.size()];
-        for (Vertice<T> vertice : vertices) {
-            int index = vertices.indexOf(vertice);
-            if (!visitados[index]) {
-                ordenacaoTopologicaRecursiva(vertice, visitados, resultado);
-            }
+        List<Vertice<T>> semArestaEntrada = this.vertices.stream().filter(v -> arestas.stream().noneMatch(a -> a.getDestino().equals(v))).toList();
+        boolean[] visitados = new boolean[this.vertices.size()];
+        for (Vertice<T> vertice : semArestaEntrada) {
+            int index = this.vertices.indexOf(vertice);
+            ordenacaoTopologicaRecursiva(vertice, visitados, resultado, index);
         }
+        Collections.reverse(resultado);
         return resultado;
     }
 
-    private void ordenacaoTopologicaRecursiva(Vertice<T> vertice, boolean[] visitados, List<Vertice<T>> resultado) {
-        visitados[vertices.indexOf(vertice)] = true;
-        for (Aresta<T> aresta : arestas) {
-            if (aresta.getOrigem().equals(vertice) && !visitados[vertices.indexOf(aresta.getDestino())]) {
-                ordenacaoTopologicaRecursiva(aresta.getDestino(), visitados, resultado);
+    private void ordenacaoTopologicaRecursiva(Vertice<T> vertice, boolean[] visitados, List<Vertice<T>> resultado, int index) {
+        if (!visitados[index]) {
+            visitados[index] = true;
+            for (Vertice<T> verticeDestino : this.verticesDestino(vertice)) {
+                int destinoIndex = this.vertices.indexOf(verticeDestino);
+                ordenacaoTopologicaRecursiva(verticeDestino, visitados, resultado, destinoIndex);
             }
+            resultado.add(vertice);
         }
-        resultado.add(vertice);
+    }
+
+    public List<Vertice<T>> verticesDestino(Vertice<T> v) {
+        return this.arestas.stream().filter(a -> a.getOrigem().equals(v)).map(Aresta::getDestino).toList();
     }
 
 }

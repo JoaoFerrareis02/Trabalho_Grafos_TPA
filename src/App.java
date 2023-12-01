@@ -6,24 +6,28 @@ public class App {
 
         Grafo<Integer> grafo = new Grafo<>();
 
-        grafo.adicionarAresta(7, 11, 1);
-        grafo.adicionarAresta(7, 8, 1);
-        grafo.adicionarAresta(5, 11, 1);
-        grafo.adicionarAresta(3, 8, 1);
-        grafo.adicionarAresta(11, 2, 1);
-        grafo.adicionarAresta(11, 9, 1);
-        grafo.adicionarAresta(11, 10, 1);
+        grafo.adicionarAresta(1, 4, 1);
+        grafo.adicionarAresta(1, 5, 1);
+        grafo.adicionarAresta(2, 5, 1);
+        grafo.adicionarAresta(4, 5, 1);
+        grafo.adicionarAresta(4, 7, 1);
+        grafo.adicionarAresta(6, 7, 1);
+        grafo.adicionarAresta(6, 8, 1);
         grafo.adicionarAresta(8, 9, 1);
-        grafo.adicionarAresta(3, 10, 1);
-        //grafo.adicionarAresta(3, 7, 1);
-        //grafo.adicionarAresta(3, 0, 1);
+        grafo.adicionarAresta(7, 9, 1);
+        // grafo.adicionarAresta(9, 1, 1);
+        grafo.adicionaVertice(3);
 
-        //grafo.buscaProfundidade();
+        // grafo.buscaProfundidade();
 
-        //System.out.println(grafo.temCiclo());
+        System.out.printf("\nTem ciclo: %s\n\n", (grafo.temCiclo()) ? "Sim" : "Não");
 
-        for (Vertice<Integer> vertice : grafo.ordenacaoTopologica()) {
-            System.out.print(vertice.getValor() + " - ");
+        try {
+            for (Vertice<Integer> vertice : grafo.ordenacaoTopologica()) {
+                System.out.print(vertice.getValor() + " ");
+            }
+        } catch (NullPointerException e) {
+            System.out.println("Grafo cíclico ou vazio.");
         }
 
     }
