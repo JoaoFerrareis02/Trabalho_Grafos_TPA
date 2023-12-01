@@ -51,8 +51,6 @@ public class Grafo<T> {
         this.arestas.add(novaAresta);
     }
 
-    /*--- Função para fazer busca por profundidade ---*/
-
     public void buscaProfundidade() {
         boolean[] visitados = new boolean[vertices.size()];
         int index;
@@ -80,7 +78,11 @@ public class Grafo<T> {
         int index;
         for (Vertice<T> vertice : this.vertices) {
             index = this.vertices.indexOf(vertice);
-            return !visitados[index] && temCicloRecursivo(vertice, visitados, noCaminho, index);
+            if (!visitados[index]) {
+                if (temCicloRecursivo(vertice, visitados, noCaminho, index)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -107,7 +109,7 @@ public class Grafo<T> {
             return null;
         }
         List<Vertice<T>> resultado = new ArrayList<>();
-        List<Vertice<T>> semArestaEntrada = this.vertices.stream().filter(v -> arestas.stream().noneMatch(a -> a.getDestino().equals(v))).toList();
+        List<Vertice<T>> semArestaEntrada = this.verticesSemArestaEntrada();
         boolean[] visitados = new boolean[this.vertices.size()];
         for (Vertice<T> vertice : semArestaEntrada) {
             int index = this.vertices.indexOf(vertice);
@@ -129,7 +131,31 @@ public class Grafo<T> {
     }
 
     private List<Vertice<T>> verticesDestino(Vertice<T> v) {
-        return this.arestas.stream().filter(a -> a.getOrigem().equals(v)).map(Aresta::getDestino).toList();
+        List<Vertice<T>> vertices = new ArrayList<>();
+        for (Aresta<T> aresta : this.arestas) {
+            if (aresta.getOrigem().equals(v)) {
+                vertices.add(aresta.getDestino());
+            }
+        }
+        return vertices;
+    }
+
+    private List<Vertice<T>> verticesSemArestaEntrada(){
+        List<Vertice<T>> vertices = new ArrayList<>();
+        boolean semAresta;
+        for (Vertice<T> vertice : this.vertices) {
+            semAresta = false;
+            for (Aresta<T> aresta : this.arestas) {
+                if (aresta.getDestino().equals(vertice)) {
+                    semAresta = true;
+                    break;
+                }
+            }
+            if(!semAresta){
+                vertices.add(vertice);
+            }
+        }
+        return vertices;
     }
 
 }
