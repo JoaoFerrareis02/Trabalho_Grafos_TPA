@@ -128,7 +128,7 @@ public class Grafo<T> {
         }
     }
 
-    public List<Vertice<T>> verticesDestino(Vertice<T> v) {
+    private List<Vertice<T>> verticesDestino(Vertice<T> v) {
         return this.arestas.stream().filter(a -> a.getOrigem().equals(v)).map(Aresta::getDestino).toList();
     }
 
