@@ -15,7 +15,7 @@ public class App {
         grafo.adicionarAresta(6, 8, 1);
         grafo.adicionarAresta(8, 9, 1);
         grafo.adicionarAresta(7, 9, 1);
-        // grafo.adicionarAresta(9, 1, 1);
+        //grafo.adicionarAresta(9, 1, 1);
         grafo.adicionaVertice(3);
 
         // grafo.buscaProfundidade();
